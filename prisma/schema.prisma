@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model RawMaterial {
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  deletedAt               DateTime?
+
+  batches                 RawMaterialBatch[]
+  templateItems           AssemblyTemplateItem[]
+  assemblyItems           AssemblyItem[]
+
+  @@index([deletedAt])
+}
+
+model RawMaterialBatch {
+  id                      Int                      @id @default(autoincrement())
+  rawMaterialId           Int
+  purchasePrice           Int
+  initialQuantity         Int
+  remainingQuantity       Int
+  purchasedAt             DateTime
+
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+
+  rawMaterial             RawMaterial              @relation(fields: [rawMaterialId], references: [id])
+  assemblyItems           AssemblyItem[]
+
+  @@index([rawMaterialId])
+}
+
+model AssemblyTemplate {
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  deletedAt               DateTime?
+
+  items                   AssemblyTemplateItem[]
+  assemblies              Assembly[]
+
+  @@index([deletedAt])
+}
+
+model AssemblyTemplateItem {
+  id                      Int                      @id @default(autoincrement())
+  assemblyTemplateId      Int
+  rawMaterialId           Int
+  quantityPerUnit         Int
+
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+
+  assemblyTemplate        AssemblyTemplate         @relation(fields: [assemblyTemplateId], references: [id])
+  rawMaterial             RawMaterial              @relation(fields: [rawMaterialId], references: [id])
+
+  @@unique([assemblyTemplateId, rawMaterialId])
+  @@index([assemblyTemplateId])
+  @@index([rawMaterialId])
+}
+
+model Assembly {
+  id                      Int                      @id @default(autoincrement())
+  assemblyTemplateId      Int
+  quantityAssembled       Int                      @default(1)
+  remainingQuantity       Int
+
+  createdAt               DateTime                 @default(now())
+
+  assemblyTemplate        AssemblyTemplate         @relation(fields: [assemblyTemplateId], references: [id])
+  items                   AssemblyItem[]
+  saleItems               SaleItem[]
+
+  @@index([assemblyTemplateId])
+}
+
+model AssemblyItem {
+  id                      Int                      @id @default(autoincrement())
+  assemblyId              Int
+  rawMaterialBatchId      Int
+  rawMaterialId           Int
+
+  createdAt               DateTime                 @default(now())
+
+  assembly                Assembly                 @relation(fields: [assemblyId], references: [id])
+  rawMaterialBatch        RawMaterialBatch         @relation(fields: [rawMaterialBatchId], references: [id])
+  rawMaterial             RawMaterial              @relation(fields: [rawMaterialId], references: [id])
+
+  @@unique([assemblyId, rawMaterialId])
+  @@index([assemblyId])
+  @@index([rawMaterialBatchId])
+}
+
+model Sale {
+  id                      Int                      @id @default(autoincrement())
+  clientName              String?
+  soldAt                  DateTime                 @default(now())
+
+  createdAt               DateTime                 @default(now())
+
+  items                   SaleItem[]
+}
+
+model SaleItem {
+  id                      Int                      @id @default(autoincrement())
+  saleId                  Int
+  assemblyId              Int
+  quantitySold            Int
+  sellingPricePerUnit     Int
+
+  createdAt               DateTime                 @default(now())
+
+  sale                    Sale                     @relation(fields: [saleId], references: [id])
+  assembly                Assembly                 @relation(fields: [assemblyId], references: [id])
+
+  @@index([saleId])
+  @@index([assemblyId])
+}
