@@ -89,7 +89,7 @@ model AssemblyItem {
   id                      Int                      @id @default(autoincrement())
   assemblyId              Int
   rawMaterialBatchId      Int
-  rawMaterialId           Int
+  rawMaterialId           Int                      // denorm: derivable via batch, kept for uq_assembly_item_material
 
   createdAt               DateTime                 @default(now())
 
