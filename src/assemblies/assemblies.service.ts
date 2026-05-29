@@ -45,11 +45,24 @@ export class AssembliesService {
       if (template.items.length === 0)
         throw new BadRequestException('Template has no items');
 
+      const batches = await tx.rawMaterialBatch.findMany({
+        where: { id: { in: dto.batches.map((b) => b.rawMaterialBatchId) } },
+      });
+      const batchById = new Map(batches.map((b) => [b.id, b]));
+
+      for (const allocation of dto.batches) {
+        const batch = batchById.get(allocation.rawMaterialBatchId);
+        if (!batch)
+          throw new NotFoundException(
+            `RawMaterialBatch #${allocation.rawMaterialBatchId} not found`,
+          );
+      }
+
       const templateMaterialIds = new Set(
         template.items.map((i) => i.rawMaterialId),
       );
       const inputMaterialIds = new Set(
-        dto.batches.map((b) => b.rawMaterialId),
+        dto.batches.map((b) => batchById.get(b.rawMaterialBatchId)!.rawMaterialId),
       );
 
       for (const mid of templateMaterialIds) {
@@ -66,35 +79,19 @@ export class AssembliesService {
       }
 
       for (const allocation of dto.batches) {
+        const batch = batchById.get(allocation.rawMaterialBatchId)!;
         const templateItem = template.items.find(
-          (i) => i.rawMaterialId === allocation.rawMaterialId,
+          (i) => i.rawMaterialId === batch.rawMaterialId,
         )!;
-        const expected =
-          templateItem.quantityPerUnit * dto.quantityAssembled;
-        if (allocation.quantityUsed !== expected)
+        const quantityUsed = templateItem.quantityPerUnit * dto.quantityAssembled;
+        if (batch.remainingQuantity < quantityUsed)
           throw new BadRequestException(
-            `rawMaterialId ${allocation.rawMaterialId}: expected quantityUsed ${expected}, got ${allocation.quantityUsed}`,
-          );
-
-        const batch = await tx.rawMaterialBatch.findUnique({
-          where: { id: allocation.rawMaterialBatchId },
-        });
-        if (!batch)
-          throw new NotFoundException(
-            `RawMaterialBatch #${allocation.rawMaterialBatchId} not found`,
-          );
-        if (batch.rawMaterialId !== allocation.rawMaterialId)
-          throw new BadRequestException(
-            `Batch #${allocation.rawMaterialBatchId} does not belong to rawMaterialId ${allocation.rawMaterialId}`,
-          );
-        if (batch.remainingQuantity < allocation.quantityUsed)
-          throw new BadRequestException(
-            `Batch #${allocation.rawMaterialBatchId} has only ${batch.remainingQuantity} units remaining, need ${allocation.quantityUsed}`,
+            `RawMaterialBatch #${batch.id} has only ${batch.remainingQuantity} units remaining, need ${quantityUsed}`,
           );
 
         await tx.rawMaterialBatch.update({
-          where: { id: allocation.rawMaterialBatchId },
-          data: { remainingQuantity: { decrement: allocation.quantityUsed } },
+          where: { id: batch.id },
+          data: { remainingQuantity: { decrement: quantityUsed } },
         });
       }
 
@@ -104,10 +101,17 @@ export class AssembliesService {
           quantityAssembled: dto.quantityAssembled,
           remainingQuantity: dto.quantityAssembled,
           items: {
-            create: dto.batches.map((b) => ({
-              rawMaterialId: b.rawMaterialId,
-              rawMaterialBatchId: b.rawMaterialBatchId,
-            })),
+            create: dto.batches.map((b) => {
+              const batch = batchById.get(b.rawMaterialBatchId)!;
+              const templateItem = template.items.find(
+                (i) => i.rawMaterialId === batch.rawMaterialId,
+              )!;
+              return {
+                rawMaterialId: batch.rawMaterialId,
+                rawMaterialBatchId: b.rawMaterialBatchId,
+                quantityPerUnit: templateItem.quantityPerUnit,
+              };
+            }),
           },
         },
         include: {

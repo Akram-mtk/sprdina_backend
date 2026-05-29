@@ -11,14 +11,6 @@ export class CreateAssemblyBatchAllocationDto {
   @IsInt()
   @IsPositive()
   rawMaterialBatchId: number;
-
-  @IsInt()
-  @IsPositive()
-  rawMaterialId: number;
-
-  @IsInt()
-  @IsPositive()
-  quantityUsed: number;
 }
 
 export class CreateAssemblyDto {

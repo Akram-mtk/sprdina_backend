@@ -89,6 +89,7 @@ model AssemblyItem {
   assemblyId              Int
   rawMaterialBatchId      Int
   rawMaterialId           Int                      // denorm: derivable via batch, kept for uq_assembly_item_material
+  quantityPerUnit         Int                      // snapshot from template at assembly time; insulates history from template edits
 
   createdAt               DateTime                 @default(now())
 
