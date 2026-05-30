@@ -64,6 +64,10 @@ export class AssembliesService {
       const inputMaterialIds = new Set(
         dto.batches.map((b) => batchById.get(b.rawMaterialBatchId)!.rawMaterialId),
       );
+      if (inputMaterialIds.size !== dto.batches.length)
+        throw new BadRequestException(
+          'Each rawMaterial may have at most one batch allocation per assembly',
+        );
 
       for (const mid of templateMaterialIds) {
         if (!inputMaterialIds.has(mid))
@@ -84,15 +88,17 @@ export class AssembliesService {
           (i) => i.rawMaterialId === batch.rawMaterialId,
         )!;
         const quantityUsed = templateItem.quantityPerUnit * dto.quantityAssembled;
-        if (batch.remainingQuantity < quantityUsed)
+
+        // Atomic guard: only decrement if enough stock remains, so two
+        // concurrent assemblies can't both pass a stale check and oversell.
+        const updated = await tx.rawMaterialBatch.updateMany({
+          where: { id: batch.id, remainingQuantity: { gte: quantityUsed } },
+          data: { remainingQuantity: { decrement: quantityUsed } },
+        });
+        if (updated.count === 0)
           throw new BadRequestException(
             `RawMaterialBatch #${batch.id} has only ${batch.remainingQuantity} units remaining, need ${quantityUsed}`,
           );
-
-        await tx.rawMaterialBatch.update({
-          where: { id: batch.id },
-          data: { remainingQuantity: { decrement: quantityUsed } },
-        });
       }
 
       return tx.assembly.create({

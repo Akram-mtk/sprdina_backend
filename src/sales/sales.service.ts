@@ -39,15 +39,20 @@ export class SalesService {
         });
         if (!assembly)
           throw new NotFoundException(`Assembly #${item.assemblyId} not found`);
-        if (assembly.remainingQuantity < item.quantitySold)
+
+        // Atomic guard: only decrement if enough stock remains, so concurrent
+        // sales (or the same assembly listed twice) can't oversell.
+        const updated = await tx.assembly.updateMany({
+          where: {
+            id: item.assemblyId,
+            remainingQuantity: { gte: item.quantitySold },
+          },
+          data: { remainingQuantity: { decrement: item.quantitySold } },
+        });
+        if (updated.count === 0)
           throw new BadRequestException(
             `Assembly #${item.assemblyId} has only ${assembly.remainingQuantity} units remaining, need ${item.quantitySold}`,
           );
-
-        await tx.assembly.update({
-          where: { id: item.assemblyId },
-          data: { remainingQuantity: { decrement: item.quantitySold } },
-        });
       }
 
       return tx.sale.create({
