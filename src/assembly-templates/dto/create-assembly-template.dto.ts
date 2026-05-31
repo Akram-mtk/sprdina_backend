@@ -24,10 +24,12 @@ export class CreateAssemblyTemplateDto {
 }
 
 export class CreateAssemblyTemplateItemDto {
+  @Type(() => Number)
   @IsInt()
   @IsPositive()
   rawMaterialId: number;
 
+  @Type(() => Number)
   @IsNumber()
   @IsPositive()
   quantityPerUnit: number;

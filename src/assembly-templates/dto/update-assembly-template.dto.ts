@@ -1,3 +1,4 @@
+import { Type } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsOptional, IsString, IsPositive } from 'class-validator';
 
 export class UpdateAssemblyTemplateDto {
@@ -8,6 +9,7 @@ export class UpdateAssemblyTemplateDto {
 }
 
 export class UpdateAssemblyTemplateItemDto {
+  @Type(() => Number)
   @IsNumber()
   @IsPositive()
   quantityPerUnit: number;
