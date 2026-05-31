@@ -2,6 +2,7 @@ import { Type } from 'class-transformer';
 import {
   IsArray,
   IsNotEmpty,
+  IsNumber,
   IsOptional,
   IsString,
   ValidateNested,
@@ -27,7 +28,7 @@ export class CreateAssemblyTemplateItemDto {
   @IsPositive()
   rawMaterialId: number;
 
-  @IsInt()
+  @IsNumber()
   @IsPositive()
   quantityPerUnit: number;
 }

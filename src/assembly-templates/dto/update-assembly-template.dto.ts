@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional, IsString, IsInt, IsPositive } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsString, IsPositive } from 'class-validator';
 
 export class UpdateAssemblyTemplateDto {
   @IsString()
@@ -8,7 +8,7 @@ export class UpdateAssemblyTemplateDto {
 }
 
 export class UpdateAssemblyTemplateItemDto {
-  @IsInt()
+  @IsNumber()
   @IsPositive()
   quantityPerUnit: number;
 }

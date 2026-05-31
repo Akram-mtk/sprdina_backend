@@ -14,8 +14,8 @@ CREATE TABLE "RawMaterialBatch" (
     "id" SERIAL NOT NULL,
     "rawMaterialId" INTEGER NOT NULL,
     "unitPurchasePrice" INTEGER NOT NULL,
-    "initialQuantity" INTEGER NOT NULL,
-    "remainingQuantity" INTEGER NOT NULL,
+    "initialQuantity" DOUBLE PRECISION NOT NULL,
+    "remainingQuantity" DOUBLE PRECISION NOT NULL,
     "purchasedAt" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -39,7 +39,7 @@ CREATE TABLE "AssemblyTemplateItem" (
     "id" SERIAL NOT NULL,
     "assemblyTemplateId" INTEGER NOT NULL,
     "rawMaterialId" INTEGER NOT NULL,
-    "quantityPerUnit" INTEGER NOT NULL,
+    "quantityPerUnit" DOUBLE PRECISION NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "deletedAt" TIMESTAMP(3),
@@ -65,7 +65,7 @@ CREATE TABLE "AssemblyItem" (
     "assemblyId" INTEGER NOT NULL,
     "rawMaterialBatchId" INTEGER NOT NULL,
     "rawMaterialId" INTEGER NOT NULL,
-    "quantityPerUnit" INTEGER NOT NULL,
+    "quantityPerUnit" DOUBLE PRECISION NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "AssemblyItem_pkey" PRIMARY KEY ("id")
@@ -75,7 +75,7 @@ CREATE TABLE "AssemblyItem" (
 CREATE TABLE "Sale" (
     "id" SERIAL NOT NULL,
     "clientName" TEXT,
-    "soldAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "soldAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Sale_pkey" PRIMARY KEY ("id")

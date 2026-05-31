@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -27,5 +28,10 @@ export class AssembliesController {
   @Post()
   create(@Body() dto: CreateAssemblyDto) {
     return this.service.create(dto);
+  }
+
+  @Delete(':id')
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.service.remove(id);
   }
 }

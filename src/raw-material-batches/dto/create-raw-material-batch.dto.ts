@@ -1,4 +1,4 @@
-import { IsDateString, IsInt, IsPositive, Min } from 'class-validator';
+import { IsDateString, IsInt, IsNumber, IsPositive, Min } from 'class-validator';
 
 export class CreateRawMaterialBatchDto {
   @IsInt()
@@ -9,7 +9,7 @@ export class CreateRawMaterialBatchDto {
   @Min(0)
   unitPurchasePrice: number;
 
-  @IsInt()
+  @IsNumber()
   @IsPositive()
   initialQuantity: number;
 

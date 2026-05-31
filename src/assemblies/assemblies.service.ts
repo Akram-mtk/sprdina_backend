@@ -128,4 +128,30 @@ export class AssembliesService {
       });
     });
   }
+  // NOTE : curiosity brk, machi kon n5li fetches outside transaction ?
+  async remove(id: number) {
+    return this.prisma.$transaction(async (tx) => {
+      const assembly = await tx.assembly.findUnique({
+        where: { id },
+        include: { items: true },
+      });
+      if (!assembly) throw new NotFoundException(`Assembly #${id} not found`);
+
+      const saleItemCount = await tx.saleItem.count({ where: { assemblyId: id } });
+      if (saleItemCount > 0)
+        throw new BadRequestException(
+          'Cannot delete assembly with existing sales — delete the sales first',
+        );
+
+      for (const item of assembly.items) {
+        await tx.rawMaterialBatch.update({
+          where: { id: item.rawMaterialBatchId },
+          data: { remainingQuantity: { increment: item.quantityPerUnit * assembly.quantityAssembled } },
+        });
+      }
+
+      await tx.assemblyItem.deleteMany({ where: { assemblyId: id } });
+      return tx.assembly.delete({ where: { id } });
+    });
+  }
 }

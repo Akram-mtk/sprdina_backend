@@ -87,5 +87,25 @@ export class SalesService {
       },
     });
   }
+  
+  async remove(id: number) {
+    return this.prisma.$transaction(async (tx) => {
+      const sale = await tx.sale.findUnique({
+        where: { id },
+        include: { items: true },
+      });
+      if (!sale) throw new NotFoundException(`Sale #${id} not found`);
+
+      for (const item of sale.items) {
+        await tx.assembly.update({
+          where: { id: item.assemblyId },
+          data: { remainingQuantity: { increment: item.quantitySold } },
+        });
+      }
+
+      await tx.saleItem.deleteMany({ where: { saleId: id } });
+      return tx.sale.delete({ where: { id } });
+    });
+  }
 
 }

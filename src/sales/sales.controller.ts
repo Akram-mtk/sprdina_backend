@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseIntPipe,
@@ -33,5 +34,10 @@ export class SalesController {
   @Patch(':id/mark-sold')
   markSold(@Param('id', ParseIntPipe) id: number) {
     return this.service.markSold(id);
+  }
+
+  @Delete(':id')
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.service.remove(id);
   }
 }

@@ -25,8 +25,8 @@ model RawMaterialBatch {
   id                      Int                      @id @default(autoincrement())
   rawMaterialId           Int
   unitPurchasePrice       Int
-  initialQuantity         Int
-  remainingQuantity       Int
+  initialQuantity         Float
+  remainingQuantity       Float
   purchasedAt             DateTime
 
   createdAt               DateTime                 @default(now())
@@ -57,7 +57,7 @@ model AssemblyTemplateItem {
   id                      Int                      @id @default(autoincrement())
   assemblyTemplateId      Int
   rawMaterialId           Int
-  quantityPerUnit         Int
+  quantityPerUnit         Float
 
   createdAt               DateTime                 @default(now())
   updatedAt               DateTime                 @updatedAt
@@ -94,7 +94,7 @@ model AssemblyItem {
   assemblyId              Int
   rawMaterialBatchId      Int
   rawMaterialId           Int                      // denorm: derivable via batch, kept for uq_assembly_item_material
-  quantityPerUnit         Int                      // snapshot from template at assembly time; insulates history from template edits
+  quantityPerUnit         Float                    // snapshot from template at assembly time; insulates history from template edits
 
   createdAt               DateTime                 @default(now())
 
