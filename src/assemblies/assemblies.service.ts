@@ -58,6 +58,7 @@ export class AssembliesService {
           );
       }
 
+      // it check rawMat unique in assemblie, remove it from schema
       const templateMaterialIds = new Set(
         template.items.map((i) => i.rawMaterialId),
       );

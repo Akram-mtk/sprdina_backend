@@ -39,7 +39,7 @@ export class RawMaterialBatchesService {
     return this.prisma.rawMaterialBatch.create({
       data: {
         rawMaterialId: dto.rawMaterialId,
-        purchasePrice: dto.purchasePrice,
+        unitPurchasePrice: dto.unitPurchasePrice,
         initialQuantity: dto.initialQuantity,
         remainingQuantity: dto.initialQuantity,
         purchasedAt: new Date(dto.purchasedAt),
@@ -52,8 +52,8 @@ export class RawMaterialBatchesService {
     return this.prisma.rawMaterialBatch.update({
       where: { id },
       data: {
-        ...(dto.purchasePrice !== undefined && {
-          purchasePrice: dto.purchasePrice,
+        ...(dto.unitPurchasePrice !== undefined && {
+          unitPurchasePrice: dto.unitPurchasePrice,
         }),
         ...(dto.purchasedAt !== undefined && {
           purchasedAt: new Date(dto.purchasedAt),

@@ -4,7 +4,7 @@ export class UpdateRawMaterialBatchDto {
   @IsInt()
   @Min(0)
   @IsOptional()
-  purchasePrice?: number;
+  unitPurchasePrice?: number;
 
   @IsDateString()
   @IsOptional()

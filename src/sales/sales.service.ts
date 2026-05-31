@@ -58,7 +58,6 @@ export class SalesService {
       return tx.sale.create({
         data: {
           clientName: dto.clientName,
-          soldAt: dto.soldAt ? new Date(dto.soldAt) : undefined,
           items: {
             create: dto.items.map((i) => ({
               assemblyId: i.assemblyId,
@@ -75,4 +74,18 @@ export class SalesService {
       });
     });
   }
+  
+  async markSold(id: number) {
+    await this.findOneOrThrow(id);
+    return this.prisma.sale.update({
+      where: { id },
+      data: { soldAt: new Date() },
+      include: {
+        items: {
+          include: { assembly: { include: { assemblyTemplate: true } } },
+        },
+      },
+    });
+  }
+
 }

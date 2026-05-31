@@ -5,10 +5,8 @@ import {
 } from '@nestjs/common';
 
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateAssemblyTemplateDto } from './dto/create-assembly-template.dto';
-import { CreateAssemblyTemplateItemDto } from './dto/create-assembly-template-item.dto';
-import { UpdateAssemblyTemplateDto } from './dto/update-assembly-template.dto';
-import { UpdateAssemblyTemplateItemDto } from './dto/update-assembly-template-item.dto';
+import { CreateAssemblyTemplateDto, CreateAssemblyTemplateItemDto } from './dto/create-assembly-template.dto';
+import { UpdateAssemblyTemplateDto, UpdateAssemblyTemplateItemDto } from './dto/update-assembly-template.dto';
 
 @Injectable()
 export class AssemblyTemplatesService {

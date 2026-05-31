@@ -5,9 +5,10 @@ import {
   IsOptional,
   IsString,
   ValidateNested,
+  IsInt,
+  IsPositive
 } from 'class-validator';
 
-import { CreateAssemblyTemplateItemDto } from './create-assembly-template-item.dto';
 
 export class CreateAssemblyTemplateDto {
   @IsString()
@@ -19,4 +20,14 @@ export class CreateAssemblyTemplateDto {
   @Type(() => CreateAssemblyTemplateItemDto)
   @IsOptional()
   items?: CreateAssemblyTemplateItemDto[];
+}
+
+export class CreateAssemblyTemplateItemDto {
+  @IsInt()
+  @IsPositive()
+  rawMaterialId: number;
+
+  @IsInt()
+  @IsPositive()
+  quantityPerUnit: number;
 }

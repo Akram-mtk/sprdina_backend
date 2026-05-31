@@ -11,10 +11,8 @@ import {
 } from '@nestjs/common';
 
 import { AssemblyTemplatesService } from './assembly-templates.service';
-import { CreateAssemblyTemplateDto } from './dto/create-assembly-template.dto';
-import { CreateAssemblyTemplateItemDto } from './dto/create-assembly-template-item.dto';
-import { UpdateAssemblyTemplateDto } from './dto/update-assembly-template.dto';
-import { UpdateAssemblyTemplateItemDto } from './dto/update-assembly-template-item.dto';
+import { CreateAssemblyTemplateDto, CreateAssemblyTemplateItemDto } from './dto/create-assembly-template.dto';
+import { UpdateAssemblyTemplateDto, UpdateAssemblyTemplateItemDto } from './dto/update-assembly-template.dto';
 
 @Controller('assembly-templates')
 export class AssemblyTemplatesController {

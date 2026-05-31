@@ -7,7 +7,7 @@ export class CreateRawMaterialBatchDto {
 
   @IsInt()
   @Min(0)
-  purchasePrice: number;
+  unitPurchasePrice: number;
 
   @IsInt()
   @IsPositive()

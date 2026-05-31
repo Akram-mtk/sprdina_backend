@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
 } from '@nestjs/common';
 
@@ -27,5 +28,10 @@ export class SalesController {
   @Post()
   create(@Body() dto: CreateSaleDto) {
     return this.service.create(dto);
+  }
+
+  @Patch(':id/mark-sold')
+  markSold(@Param('id', ParseIntPipe) id: number) {
+    return this.service.markSold(id);
   }
 }

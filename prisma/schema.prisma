@@ -24,7 +24,7 @@ model RawMaterial {
 model RawMaterialBatch {
   id                      Int                      @id @default(autoincrement())
   rawMaterialId           Int
-  purchasePrice           Int
+  unitPurchasePrice       Int
   initialQuantity         Int
   remainingQuantity       Int
   purchasedAt             DateTime
@@ -36,6 +36,7 @@ model RawMaterialBatch {
   assemblyItems           AssemblyItem[]
 
   @@index([rawMaterialId])
+  @@index([remainingQuantity])
 }
 
 model AssemblyTemplate {
@@ -60,6 +61,7 @@ model AssemblyTemplateItem {
 
   createdAt               DateTime                 @default(now())
   updatedAt               DateTime                 @updatedAt
+  deletedAt               DateTime?
 
   assemblyTemplate        AssemblyTemplate         @relation(fields: [assemblyTemplateId], references: [id])
   rawMaterial             RawMaterial              @relation(fields: [rawMaterialId], references: [id])
@@ -67,6 +69,7 @@ model AssemblyTemplateItem {
   @@unique([assemblyTemplateId, rawMaterialId])
   @@index([assemblyTemplateId])
   @@index([rawMaterialId])
+  @@index([deletedAt])
 }
 
 model Assembly {
@@ -76,12 +79,14 @@ model Assembly {
   remainingQuantity       Int
 
   createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
 
   assemblyTemplate        AssemblyTemplate         @relation(fields: [assemblyTemplateId], references: [id])
   items                   AssemblyItem[]
   saleItems               SaleItem[]
 
   @@index([assemblyTemplateId])
+  @@index([remainingQuantity])
 }
 
 model AssemblyItem {
@@ -105,7 +110,7 @@ model AssemblyItem {
 model Sale {
   id                      Int                      @id @default(autoincrement())
   clientName              String?
-  soldAt                  DateTime                 @default(now())
+  soldAt                  DateTime?
 
   createdAt               DateTime                 @default(now())
 
