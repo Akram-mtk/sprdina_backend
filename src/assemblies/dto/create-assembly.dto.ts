@@ -1,10 +1,12 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   ArrayMinSize,
   IsArray,
   IsInt,
+  IsOptional,
   IsPositive,
+  Min,
   ValidateNested,
 } from 'class-validator';
 
@@ -25,6 +27,12 @@ export class CreateAssemblyDto {
   @IsInt()
   @IsPositive()
   quantityAssembled: number;
+
+  @ApiPropertyOptional({ example: 2500 })
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  defaultSellingPrice?: number;
 
   @ApiProperty({
     type: [CreateAssemblyBatchAllocationDto],

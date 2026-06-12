@@ -5,11 +5,13 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Patch,
   Post,
 } from '@nestjs/common';
 
 import { AssembliesService } from './assemblies.service';
 import { CreateAssemblyDto } from './dto/create-assembly.dto';
+import { UpdateAssemblyDto } from './dto/update-assembly.dto';
 
 @Controller('assemblies')
 export class AssembliesController {
@@ -28,6 +30,14 @@ export class AssembliesController {
   @Post()
   create(@Body() dto: CreateAssemblyDto) {
     return this.service.create(dto);
+  }
+
+  @Patch(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: UpdateAssemblyDto,
+  ) {
+    return this.service.update(id, dto);
   }
 
   @Delete(':id')

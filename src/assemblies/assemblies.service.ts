@@ -6,6 +6,7 @@ import {
 
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateAssemblyDto } from './dto/create-assembly.dto';
+import { UpdateAssemblyDto } from './dto/update-assembly.dto';
 
 @Injectable()
 export class AssembliesService {
@@ -107,6 +108,7 @@ export class AssembliesService {
           assemblyTemplateId: dto.assemblyTemplateId,
           quantityAssembled: dto.quantityAssembled,
           remainingQuantity: dto.quantityAssembled,
+          defaultSellingPrice: dto.defaultSellingPrice ?? null,
           items: {
             create: dto.batches.map((b) => {
               const batch = batchById.get(b.rawMaterialBatchId)!;
@@ -128,6 +130,23 @@ export class AssembliesService {
       });
     });
   }
+
+  async update(id: number, dto: UpdateAssemblyDto) {
+    await this.findOneOrThrow(id);
+    return this.prisma.assembly.update({
+      where: { id },
+      data: {
+        ...(dto.defaultSellingPrice !== undefined && {
+          defaultSellingPrice: dto.defaultSellingPrice,
+        }),
+      },
+      include: {
+        assemblyTemplate: true,
+        items: { include: { rawMaterial: true, rawMaterialBatch: true } },
+      },
+    });
+  }
+
   // NOTE : curiosity brk, machi kon n5li fetches outside transaction ?
   async remove(id: number) {
     return this.prisma.$transaction(async (tx) => {

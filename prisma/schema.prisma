@@ -39,7 +39,6 @@ model RawMaterialBatch {
   @@index([remainingQuantity])
 }
 
-// NOTE : add default selling price (can be null)
 model AssemblyTemplate {
   id                      Int                      @id @default(autoincrement())
   name                    String
@@ -76,6 +75,7 @@ model Assembly {
   assemblyTemplateId      Int
   quantityAssembled       Int                      @default(1)
   remainingQuantity       Int
+  defaultSellingPrice     Int?                     // default per-unit selling price in cents; prefilled when selling from this batch
 
   createdAt               DateTime                 @default(now())
   updatedAt               DateTime                 @updatedAt
