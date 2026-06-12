@@ -62,10 +62,6 @@ export class RawMaterialBatchesService {
     });
   }
 
-  // Moves a stranded remainder into another batch of the same material so it
-  // stays usable (assemblies can't split one material across batches). The
-  // moved quantity takes on the target batch's purchase price in future cost
-  // calculations; initialQuantity stays untouched as purchase history.
   async mergeInto(sourceId: number, targetId: number) {
     if (sourceId === targetId)
       throw new BadRequestException('Cannot merge a batch into itself');
@@ -91,9 +87,6 @@ export class RawMaterialBatchesService {
           `RawMaterialBatch #${sourceId} has no remaining quantity to merge`,
         );
 
-      // Atomic guard: only zero the source if its remaining quantity hasn't
-      // changed since we read it, so a concurrent assembly can't consume
-      // stock that we then double-count into the target.
       const zeroed = await tx.rawMaterialBatch.updateMany({
         where: { id: sourceId, remainingQuantity: source.remainingQuantity },
         data: { remainingQuantity: 0 },
