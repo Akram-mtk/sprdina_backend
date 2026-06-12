@@ -1,7 +1,9 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsOptional, IsString, IsPositive } from 'class-validator';
+import { IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString } from 'class-validator';
 
 export class UpdateAssemblyTemplateDto {
+  @ApiPropertyOptional({ example: 'batata souvide 5kg' })
   @IsString()
   @IsNotEmpty()
   @IsOptional()
@@ -9,6 +11,7 @@ export class UpdateAssemblyTemplateDto {
 }
 
 export class UpdateAssemblyTemplateItemDto {
+  @ApiProperty({ example: 3 })
   @Type(() => Number)
   @IsNumber()
   @IsPositive()

@@ -1,36 +1,43 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsInt,
   IsNotEmpty,
   IsNumber,
   IsOptional,
+  IsPositive,
   IsString,
   ValidateNested,
-  IsInt,
-  IsPositive
 } from 'class-validator';
 
-
-export class CreateAssemblyTemplateDto {
-  @IsString()
-  @IsNotEmpty()
-  name: string;
-
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateAssemblyTemplateItemDto)
-  @IsOptional()
-  items?: CreateAssemblyTemplateItemDto[];
-}
-
 export class CreateAssemblyTemplateItemDto {
+  @ApiProperty({ example: 1 })
   @Type(() => Number)
   @IsInt()
   @IsPositive()
   rawMaterialId: number;
 
+  @ApiProperty({ example: 4 })
   @Type(() => Number)
   @IsNumber()
   @IsPositive()
   quantityPerUnit: number;
+}
+
+export class CreateAssemblyTemplateDto {
+  @ApiProperty({ example: 'batata souvide' })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+  @ApiPropertyOptional({
+    type: [CreateAssemblyTemplateItemDto],
+    example: [{ rawMaterialId: 1, quantityPerUnit: 4 }],
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateAssemblyTemplateItemDto)
+  @IsOptional()
+  items?: CreateAssemblyTemplateItemDto[];
 }

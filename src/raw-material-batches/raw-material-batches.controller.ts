@@ -9,6 +9,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { ApiQuery } from '@nestjs/swagger';
 
 import { CreateRawMaterialBatchDto } from './dto/create-raw-material-batch.dto';
 import { UpdateRawMaterialBatchDto } from './dto/update-raw-material-batch.dto';
@@ -18,6 +19,7 @@ import { RawMaterialBatchesService } from './raw-material-batches.service';
 export class RawMaterialBatchesController {
   constructor(private readonly service: RawMaterialBatchesService) {}
 
+  @ApiQuery({ name: 'rawMaterialId', required: false, type: Number })
   @Get()
   findAll(@Query('rawMaterialId', new ParseIntPipe({ optional: true })) rawMaterialId?: number) {
     return this.service.findAll(rawMaterialId);
