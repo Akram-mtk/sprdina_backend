@@ -25,20 +25,21 @@ model RawMaterialBatch {
   id                      Int                      @id @default(autoincrement())
   rawMaterialId           Int
   unitPurchasePrice       Int
-  initialQuantity         Float
-  remainingQuantity       Float
+  initialQuantity         Decimal                  @db.Decimal(12, 3)
+  remainingQuantity       Decimal                  @db.Decimal(12, 3)
   purchasedAt             DateTime
 
   createdAt               DateTime                 @default(now())
   updatedAt               DateTime                 @updatedAt
 
-  rawMaterial             RawMaterial              @relation(fields: [rawMaterialId], references: [id])
+  rawMaterial             RawMaterial              @relation(fields: [rawMaterialId], references: [id], onDelete: Restrict)
   assemblyItems           AssemblyItem[]
 
   @@index([rawMaterialId])
   @@index([remainingQuantity])
 }
 
+// NOTE : add default selling price (can be null)
 model AssemblyTemplate {
   id                      Int                      @id @default(autoincrement())
   name                    String
@@ -57,11 +58,10 @@ model AssemblyTemplateItem {
   id                      Int                      @id @default(autoincrement())
   assemblyTemplateId      Int
   rawMaterialId           Int
-  quantityPerUnit         Float
+  quantityPerUnit         Decimal                  @db.Decimal(12, 3)
 
   createdAt               DateTime                 @default(now())
   updatedAt               DateTime                 @updatedAt
-  deletedAt               DateTime?
 
   assemblyTemplate        AssemblyTemplate         @relation(fields: [assemblyTemplateId], references: [id])
   rawMaterial             RawMaterial              @relation(fields: [rawMaterialId], references: [id])
@@ -69,7 +69,6 @@ model AssemblyTemplateItem {
   @@unique([assemblyTemplateId, rawMaterialId])
   @@index([assemblyTemplateId])
   @@index([rawMaterialId])
-  @@index([deletedAt])
 }
 
 model Assembly {
@@ -94,27 +93,46 @@ model AssemblyItem {
   assemblyId              Int
   rawMaterialBatchId      Int
   rawMaterialId           Int                      // denorm: derivable via batch, kept for uq_assembly_item_material
-  quantityPerUnit         Float                    // snapshot from template at assembly time; insulates history from template edits
+  quantityPerUnit         Decimal                  @db.Decimal(12, 3) // snapshot from template at assembly time; insulates history from template edits
 
   createdAt               DateTime                 @default(now())
 
-  assembly                Assembly                 @relation(fields: [assemblyId], references: [id])
-  rawMaterialBatch        RawMaterialBatch         @relation(fields: [rawMaterialBatchId], references: [id])
-  rawMaterial             RawMaterial              @relation(fields: [rawMaterialId], references: [id])
+  assembly                Assembly                 @relation(fields: [assemblyId], references: [id], onDelete: Restrict)
+  rawMaterialBatch        RawMaterialBatch         @relation(fields: [rawMaterialBatchId], references: [id], onDelete: Restrict)
+  rawMaterial             RawMaterial              @relation(fields: [rawMaterialId], references: [id], onDelete: Restrict)
 
   @@unique([assemblyId, rawMaterialId])
   @@index([assemblyId])
   @@index([rawMaterialBatchId])
 }
 
+model Client {
+  id                      Int                      @id @default(autoincrement())
+  name                    String
+
+  createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
+  deletedAt               DateTime?
+
+  sales                   Sale[]
+
+  @@index([deletedAt])
+}
+
 model Sale {
   id                      Int                      @id @default(autoincrement())
   clientName              String?
+  clientId                Int?
   soldAt                  DateTime?
 
   createdAt               DateTime                 @default(now())
+  updatedAt               DateTime                 @updatedAt
 
+  client                  Client?                  @relation(fields: [clientId], references: [id])
   items                   SaleItem[]
+
+  @@index([clientId])
+  @@index([soldAt])
 }
 
 model SaleItem {
@@ -126,8 +144,8 @@ model SaleItem {
 
   createdAt               DateTime                 @default(now())
 
-  sale                    Sale                     @relation(fields: [saleId], references: [id])
-  assembly                Assembly                 @relation(fields: [assemblyId], references: [id])
+  sale                    Sale                     @relation(fields: [saleId], references: [id], onDelete: Restrict)
+  assembly                Assembly                 @relation(fields: [assemblyId], references: [id], onDelete: Restrict)
 
   @@index([saleId])
   @@index([assemblyId])

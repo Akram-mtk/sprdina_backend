@@ -14,8 +14,8 @@ CREATE TABLE "RawMaterialBatch" (
     "id" SERIAL NOT NULL,
     "rawMaterialId" INTEGER NOT NULL,
     "unitPurchasePrice" INTEGER NOT NULL,
-    "initialQuantity" DOUBLE PRECISION NOT NULL,
-    "remainingQuantity" DOUBLE PRECISION NOT NULL,
+    "initialQuantity" DECIMAL(12,3) NOT NULL,
+    "remainingQuantity" DECIMAL(12,3) NOT NULL,
     "purchasedAt" TIMESTAMP(3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
@@ -39,10 +39,9 @@ CREATE TABLE "AssemblyTemplateItem" (
     "id" SERIAL NOT NULL,
     "assemblyTemplateId" INTEGER NOT NULL,
     "rawMaterialId" INTEGER NOT NULL,
-    "quantityPerUnit" DOUBLE PRECISION NOT NULL,
+    "quantityPerUnit" DECIMAL(12,3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
-    "deletedAt" TIMESTAMP(3),
 
     CONSTRAINT "AssemblyTemplateItem_pkey" PRIMARY KEY ("id")
 );
@@ -65,18 +64,31 @@ CREATE TABLE "AssemblyItem" (
     "assemblyId" INTEGER NOT NULL,
     "rawMaterialBatchId" INTEGER NOT NULL,
     "rawMaterialId" INTEGER NOT NULL,
-    "quantityPerUnit" DOUBLE PRECISION NOT NULL,
+    "quantityPerUnit" DECIMAL(12,3) NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "AssemblyItem_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
+CREATE TABLE "Client" (
+    "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "deletedAt" TIMESTAMP(3),
+
+    CONSTRAINT "Client_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
 CREATE TABLE "Sale" (
     "id" SERIAL NOT NULL,
     "clientName" TEXT,
+    "clientId" INTEGER,
     "soldAt" TIMESTAMP(3),
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "Sale_pkey" PRIMARY KEY ("id")
 );
@@ -112,9 +124,6 @@ CREATE INDEX "AssemblyTemplateItem_assemblyTemplateId_idx" ON "AssemblyTemplateI
 CREATE INDEX "AssemblyTemplateItem_rawMaterialId_idx" ON "AssemblyTemplateItem"("rawMaterialId");
 
 -- CreateIndex
-CREATE INDEX "AssemblyTemplateItem_deletedAt_idx" ON "AssemblyTemplateItem"("deletedAt");
-
--- CreateIndex
 CREATE UNIQUE INDEX "AssemblyTemplateItem_assemblyTemplateId_rawMaterialId_key" ON "AssemblyTemplateItem"("assemblyTemplateId", "rawMaterialId");
 
 -- CreateIndex
@@ -131,6 +140,15 @@ CREATE INDEX "AssemblyItem_rawMaterialBatchId_idx" ON "AssemblyItem"("rawMateria
 
 -- CreateIndex
 CREATE UNIQUE INDEX "AssemblyItem_assemblyId_rawMaterialId_key" ON "AssemblyItem"("assemblyId", "rawMaterialId");
+
+-- CreateIndex
+CREATE INDEX "Client_deletedAt_idx" ON "Client"("deletedAt");
+
+-- CreateIndex
+CREATE INDEX "Sale_clientId_idx" ON "Sale"("clientId");
+
+-- CreateIndex
+CREATE INDEX "Sale_soldAt_idx" ON "Sale"("soldAt");
 
 -- CreateIndex
 CREATE INDEX "SaleItem_saleId_idx" ON "SaleItem"("saleId");
@@ -158,6 +176,9 @@ ALTER TABLE "AssemblyItem" ADD CONSTRAINT "AssemblyItem_rawMaterialBatchId_fkey"
 
 -- AddForeignKey
 ALTER TABLE "AssemblyItem" ADD CONSTRAINT "AssemblyItem_rawMaterialId_fkey" FOREIGN KEY ("rawMaterialId") REFERENCES "RawMaterial"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "Sale" ADD CONSTRAINT "Sale_clientId_fkey" FOREIGN KEY ("clientId") REFERENCES "Client"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "SaleItem" ADD CONSTRAINT "SaleItem_saleId_fkey" FOREIGN KEY ("saleId") REFERENCES "Sale"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

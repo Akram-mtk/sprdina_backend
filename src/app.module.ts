@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 
 import { AssembliesModule } from './assemblies/assemblies.module';
 import { AssemblyTemplatesModule } from './assembly-templates/assembly-templates.module';
+import { ClientsModule } from './clients/clients.module';
 import { PrismaModule } from './prisma/prisma.module';
 import { RawMaterialBatchesModule } from './raw-material-batches/raw-material-batches.module';
 import { RawMaterialsModule } from './raw-materials/raw-materials.module';
@@ -15,6 +16,7 @@ import { SalesModule } from './sales/sales.module';
     AssemblyTemplatesModule,
     AssembliesModule,
     SalesModule,
+    ClientsModule,
   ],
 })
 export class AppModule {}

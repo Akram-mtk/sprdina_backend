@@ -88,7 +88,7 @@ export class AssembliesService {
         const templateItem = template.items.find(
           (i) => i.rawMaterialId === batch.rawMaterialId,
         )!;
-        const quantityUsed = templateItem.quantityPerUnit * dto.quantityAssembled;
+        const quantityUsed = templateItem.quantityPerUnit.mul(dto.quantityAssembled);
 
         // Atomic guard: only decrement if enough stock remains, so two
         // concurrent assemblies can't both pass a stale check and oversell.
@@ -146,7 +146,7 @@ export class AssembliesService {
       for (const item of assembly.items) {
         await tx.rawMaterialBatch.update({
           where: { id: item.rawMaterialBatchId },
-          data: { remainingQuantity: { increment: item.quantityPerUnit * assembly.quantityAssembled } },
+          data: { remainingQuantity: { increment: item.quantityPerUnit.mul(assembly.quantityAssembled) } },
         });
       }
 

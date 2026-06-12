@@ -62,9 +62,58 @@ export class RawMaterialBatchesService {
     });
   }
 
+  // Moves a stranded remainder into another batch of the same material so it
+  // stays usable (assemblies can't split one material across batches). The
+  // moved quantity takes on the target batch's purchase price in future cost
+  // calculations; initialQuantity stays untouched as purchase history.
+  async mergeInto(sourceId: number, targetId: number) {
+    if (sourceId === targetId)
+      throw new BadRequestException('Cannot merge a batch into itself');
+
+    return this.prisma.$transaction(async (tx) => {
+      const source = await tx.rawMaterialBatch.findUnique({
+        where: { id: sourceId },
+      });
+      if (!source)
+        throw new NotFoundException(`RawMaterialBatch #${sourceId} not found`);
+      const target = await tx.rawMaterialBatch.findUnique({
+        where: { id: targetId },
+      });
+      if (!target)
+        throw new NotFoundException(`RawMaterialBatch #${targetId} not found`);
+
+      if (source.rawMaterialId !== target.rawMaterialId)
+        throw new BadRequestException(
+          'Batches must belong to the same raw material',
+        );
+      if (source.remainingQuantity.lte(0))
+        throw new BadRequestException(
+          `RawMaterialBatch #${sourceId} has no remaining quantity to merge`,
+        );
+
+      // Atomic guard: only zero the source if its remaining quantity hasn't
+      // changed since we read it, so a concurrent assembly can't consume
+      // stock that we then double-count into the target.
+      const zeroed = await tx.rawMaterialBatch.updateMany({
+        where: { id: sourceId, remainingQuantity: source.remainingQuantity },
+        data: { remainingQuantity: 0 },
+      });
+      if (zeroed.count === 0)
+        throw new BadRequestException(
+          `RawMaterialBatch #${sourceId} was modified concurrently, retry the merge`,
+        );
+
+      return tx.rawMaterialBatch.update({
+        where: { id: targetId },
+        data: { remainingQuantity: { increment: source.remainingQuantity } },
+        include: { rawMaterial: true },
+      });
+    });
+  }
+
   async remove(id: number) {
     const batch = await this.findOneOrThrow(id);
-    if (batch.remainingQuantity !== batch.initialQuantity) {
+    if (!batch.remainingQuantity.equals(batch.initialQuantity)) {
       throw new BadRequestException(
         'Batch has been partially or fully consumed and cannot be deleted',
       );

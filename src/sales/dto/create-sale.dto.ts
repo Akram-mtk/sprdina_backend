@@ -3,6 +3,7 @@ import {
   ArrayMinSize,
   IsArray,
   IsInt,
+  IsOptional,
   IsPositive,
   IsString,
   Min,
@@ -24,8 +25,14 @@ export class CreateSaleItemDto {
 }
 
 export class CreateSaleDto {
+  @IsOptional()
   @IsString()
-  clientName: string;
+  clientName?: string;
+
+  @IsOptional()
+  @IsInt()
+  @IsPositive()
+  clientId?: number;
 
   @IsArray()
   @ArrayMinSize(1)

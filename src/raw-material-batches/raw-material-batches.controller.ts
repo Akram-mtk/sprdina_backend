@@ -33,6 +33,14 @@ export class RawMaterialBatchesController {
     return this.service.create(dto);
   }
 
+  @Post(':id/merge-into/:targetId')
+  mergeInto(
+    @Param('id', ParseIntPipe) id: number,
+    @Param('targetId', ParseIntPipe) targetId: number,
+  ) {
+    return this.service.mergeInto(id, targetId);
+  }
+
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,

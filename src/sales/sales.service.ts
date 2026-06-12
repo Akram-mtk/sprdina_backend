@@ -14,6 +14,7 @@ export class SalesService {
   findAll() {
     return this.prisma.sale.findMany({
       include: {
+        client: true,
         items: { include: { assembly: { include: { assemblyTemplate: true } } } },
       },
       orderBy: { soldAt: 'desc' },
@@ -24,6 +25,7 @@ export class SalesService {
     const sale = await this.prisma.sale.findUnique({
       where: { id },
       include: {
+        client: true,
         items: { include: { assembly: { include: { assemblyTemplate: true } } } },
       },
     });
@@ -33,6 +35,17 @@ export class SalesService {
 
   async create(dto: CreateSaleDto) {
     return this.prisma.$transaction(async (tx) => {
+      let clientName = dto.clientName ?? null;
+
+      if (dto.clientId != null) {
+        const client = await tx.client.findFirst({
+          where: { id: dto.clientId, deletedAt: null },
+        });
+        if (!client)
+          throw new NotFoundException(`Client #${dto.clientId} not found`);
+        clientName = client.name;
+      }
+
       for (const item of dto.items) {
         const assembly = await tx.assembly.findUnique({
           where: { id: item.assemblyId },
@@ -57,7 +70,8 @@ export class SalesService {
 
       return tx.sale.create({
         data: {
-          clientName: dto.clientName,
+          clientName,
+          clientId: dto.clientId ?? null,
           items: {
             create: dto.items.map((i) => ({
               assemblyId: i.assemblyId,
@@ -67,6 +81,7 @@ export class SalesService {
           },
         },
         include: {
+          client: true,
           items: {
             include: { assembly: { include: { assemblyTemplate: true } } },
           },
