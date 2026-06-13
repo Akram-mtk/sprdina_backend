@@ -12,9 +12,7 @@ async function bootstrap() {
   if (process.env.NODE_ENV === 'production') {
     app.enableCors({
       origin: [
-        'https://sprdina-b2c5e7.netlify.app',
-        'http://localhost:3000',
-        'http://localhost:5173',
+        'https://sprdina-b2c5e7.netlify.app'
       ],
       methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
       allowedHeaders: ['Content-Type', 'Authorization'],
